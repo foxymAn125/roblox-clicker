@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROBLOX Clicker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #d0e6ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    #clickButton {
+      width: 200px;
+      height: 200px;
+      background: url('https://upload.wikimedia.org/wikipedia/en/8/88/Roblox_Logo_2022.svg') no-repeat center;
+      background-size: contain;
+      border: 5px solid #000;
+      margin: 20px;
+      cursor: pointer;
+    }
+    #ownerLabel {
+      font-weight: bold;
+      color: red;
+      margin-top: 5px;
+    }
+    #ownerName {
+      font-weight: bold;
+      color: red;
+      margin-bottom: 10px;
+    }
+    #stats {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+    .sidePanel {
+      width: 300px;
+      max-height: 500px;
+      overflow-y: auto;
+      margin: 0 10px;
+    }
+    .upgrade, .autoclicker {
+      border: 2px solid #333;
+      padding: 10px;
+      margin: 5px 0;
+      background: #f0f0f0;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>ROBLOX Clicker</h1>
+  <div id="ownerLabel">OWNER</div>
+  <div id="ownerName">Owned by: Ajay Slocombe</div>
+  <div id="clickButton"></div>
+  <div id="stats">
+    Coins: <span id="coins">0</span> | 
+    Upgrades: <span id="upgradeCount">0</span> | 
+    Auto-Clickers: <span id="autoClickerCount">0</span>
+  </div>
+  <div class="container">
+    <div class="sidePanel" id="upgradeContainer"></div>
+    <div class="sidePanel" id="autoclickerContainer"></div>
+  </div>
+  <script>
+    let username = "Ajay Slocombe";
+    let isOwner = username === "Ajay Slocombe";
+    let coins = isOwner ? Infinity : 0;
+    let clickPower = 1;
+    let autoClickRate = 0;
+    let totalUpgrades = 0;
+    let totalAutoClickers = 0;
+
+    const coinsDisplay = document.getElementById("coins");
+    const upgradeCountDisplay = document.getElementById("upgradeCount");
+    const autoClickerCountDisplay = document.getElementById("autoClickerCount");
+
+    function updateCoins() {
+      coinsDisplay.textContent = isOwner ? "∞" : coins;
+    }
+
+    function updateCounts() {
+      upgradeCountDisplay.textContent = totalUpgrades;
+      autoClickerCountDisplay.textContent = totalAutoClickers;
+    }
+
+    document.getElementById("clickButton").addEventListener("click", () => {
+      if (!isOwner) coins += clickPower;
+      updateCoins();
+    });
+
+    const upgrades = [];
+    for (let i = 1; i <= 40; i++) {
+      upgrades.push({
+        name: `Upgrade ${i}`,
+        cost: i * 50,
+        power: i * 10,
+        moneyBoost: i * 5,
+        count: 0
+      });
+    }
+
+    const autoClickers = [];
+    for (let i = 1; i <= 40; i++) {
+      autoClickers.push({
+        name: `Auto-Clicker ${i}`,
+        cost: i * 100,
+        rate: i * 10,
+        count: 0
+      });
+    }
+
+    const upgradeContainer = document.getElementById("upgradeContainer");
+    const autoClickerContainer = document.getElementById("autoclickerContainer");
+
+    upgrades.forEach((upgrade, index) => {
+      const btn = document.createElement("div");
+      btn.className = "upgrade";
+      btn.innerHTML = `${upgrade.name}<br>Cost: ${upgrade.cost} | +${upgrade.power} Click Power, +${upgrade.moneyBoost} Bonus Coins (Owned: ${upgrade.count})`;
+      btn.addEventListener("click", () => {
+        if (coins >= upgrade.cost || isOwner) {
+          if (!isOwner) coins -= upgrade.cost;
+          clickPower += upgrade.power;
+          if (!isOwner) coins += upgrade.moneyBoost;
+          upgrade.count++;
+          totalUpgrades++;
+          btn.innerHTML = `${upgrade.name}<br>Cost: ${upgrade.cost} | +${upgrade.power} Click Power, +${upgrade.moneyBoost} Bonus Coins (Owned: ${upgrade.count})`;
+          updateCoins();
+          updateCounts();
+        }
+      });
+      upgradeContainer.appendChild(btn);
+    });
+
+    autoClickers.forEach(clicker => {
+      const btn = document.createElement("div");
+      btn.className = "autoclicker";
+      btn.innerHTML = `${clicker.name}<br>Cost: ${clicker.cost} | +${clicker.rate} coins/sec (Owned: ${clicker.count})`;
+      btn.addEventListener("click", () => {
+        if (coins >= clicker.cost || isOwner) {
+          if (!isOwner) coins -= clicker.cost;
+          autoClickRate += clicker.rate;
+          clicker.count++;
+          totalAutoClickers++;
+          btn.innerHTML = `${clicker.name}<br>Cost: ${clicker.cost} | +${clicker.rate} coins/sec (Owned: ${clicker.count})`;
+          updateCoins();
+          updateCounts();
+        }
+      });
+      autoClickerContainer.appendChild(btn);
+    });
+
+    setInterval(() => {
+      if (!isOwner) coins += autoClickRate;
+      updateCoins();
+    }, 1000);
+
+    updateCoins();
+  </script>
+</body>
+</html>
